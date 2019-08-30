@@ -21,6 +21,9 @@ export default (video: string, audio: string, output: string): Promise<string> =
         console.log(`ffmpeg error !\n${err.message}`);
         reject(err.message);
       })
+      .on('progress', (progress) => {
+        console.log(`Processing: ${progress.percent}% done`);
+      })
       .output(`${output}.mp4`)
       .run();
   });
