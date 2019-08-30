@@ -1,1 +1,1 @@
-server: tsc && node dist
+server: node dist
