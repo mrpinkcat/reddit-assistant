@@ -1,0 +1,31 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://buildpack-registry.s3.amazonaws.com/buildpacks/zidizei/typescript.tgz"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+    }
+  ],
+  "description": "",
+  "env": {
+    "DISCORD_TOKEN": {
+      "required": true
+    }
+  },
+  "formation": {
+    "server": {
+      "quantity": 1
+    }
+  },
+  "name": "reddit-assistant",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
