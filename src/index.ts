@@ -15,9 +15,6 @@ bot.login(config.discord.token);
 bot.on('ready', () => {
   logger.info('Bot is ready');
   updateStatus();
-  bot.guilds.forEach((guild) => {
-    sendJoinMessage(guild);
-  });
 });
 
 bot.on('guildCreate', (guild) => {
