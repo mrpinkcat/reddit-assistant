@@ -1,6 +1,9 @@
 import https from 'https';
 import fs from 'fs';
-import Promise, { resolve, reject } from 'bluebird';
+import Promise from 'bluebird';
+
+import { bot } from './index'
+import { Guild, RichEmbed, TextChannel } from 'discord.js';
 
 export const getAudioUrl = (videoUrl: string): string => {
   console.log(`sound ${videoUrl}`);
@@ -40,4 +43,28 @@ export const downloadFile = (url: string, ext: string, output: string): Promise<
       }
     });
   });
+}
+
+export const updateStatus = () => {
+  console.log(`The bot is on ${bot.guilds.array().length} servers`);
+  bot.user.setActivity(`reddit links on ${bot.guilds.array().length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
+}
+
+export const sendJoinMessage = (guild: Guild) => {
+  const embed = new RichEmbed()
+  .attachFile('./assets/hohellothere.gif')
+  .setColor('ff62a5')
+  .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
+  .setTitle('**HO HELLO THERE !**')
+  .setDescription('I’m your Reddit link assistant, thanks for inviting me')
+  .addField(':movie_camera: __Basic utilisation__', 'Send a Reddit link anywhere and I’ll post the preview of it’s media')
+  .addField(':tools: __Functionality__', 'I’m compatible with Reddit images, gifs, videos and YouTube posts')
+  .addField(':computer: __Source code__', 'All the code of this application is open source & [available on GitHub](https://github.com/mrpinkcat/reddit-assistant)')
+  .addField(':bug: __Bug report__', 'If you encouter any bugs, please report them by [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or by adding *Mr. Pink#9591* on Discord\n\n**Try it out !**');
+  // Selection d'un channel pour envoyer le message de join
+  if (guild.systemChannel) {
+    (guild.systemChannel as TextChannel).send(undefined, embed);
+  } else {
+    (guild.channels.find((channel) => channel.type === 'text') as TextChannel).send(undefined, embed);
+  }
 }

@@ -1,40 +1,34 @@
-import Discord, { TextChannel, RichEmbed, Message, Guild } from 'discord.js';
+import Discord, { TextChannel, RichEmbed, Message, Guild, CategoryChannel } from 'discord.js';
 import axios from 'axios';
 import fs from 'fs';
-import https from 'https';
 import uniqid from 'uniqid';
 
 import config from './env';
 import logger from './logger';
-import { getAudioUrl, downloadFile } from './utils';
+import { getAudioUrl, downloadFile, updateStatus, sendJoinMessage } from './utils';
 import audioAssembler from './audioAssembler';
 
 export const bot = new Discord.Client();
-
-let guilds: Guild[] = []
 
 bot.login(config.discord.token);
 
 bot.on('ready', () => {
   logger.info('Bot is ready');
-  bot.user.setActivity(`reddit links on ${bot.guilds.array().length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
-  console.log(bot.guilds.array().length);
+  updateStatus();
+  bot.guilds.forEach((guild) => {
+    sendJoinMessage(guild);
+  });
 });
 
 bot.on('guildCreate', (guild) => {
-  console.log('GUILD JOIN');
-  console.log(guilds.length);
-  guilds.push(guild);
-  console.log(guilds.length);
-  bot.user.setActivity(`reddit links on ${guilds.length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
+  console.log(`Bot join ${guild.name}`);
+  updateStatus();
+  sendJoinMessage(guild);
 });
 
 bot.on('guildDelete', (guild) => {
-  console.log('GUILD LEAVE');
-  console.log(guilds.length);
-  guilds.slice(guilds.indexOf(guild));
-  console.log(guilds.length);
-  bot.user.setActivity(`reddit links on ${guilds.length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
+  console.log(`Bot leave ${guild.name}`);
+  updateStatus();
 });
 
 bot.on('message', (message) => {
