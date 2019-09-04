@@ -111,7 +111,7 @@ bot.on('message', (message) => {
                     .attachFile(`reddit-media-${id}.mp4`)
                     .setColor('ff62a5')
                     .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                    .setTitle(`${post.title}`);
+                    .setTitle(`r/${post.subreddit} - ${post.title}`);
                   
                   textChannel.send(undefined, embed)
                     .then(() => {
@@ -141,7 +141,7 @@ bot.on('message', (message) => {
                   .attachFile(`video-${id}.mp4`)
                   .setColor('ff62a5')
                   .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                  .setTitle(`${post.title}`);
+                  .setTitle(`r/${post.subreddit} - ${post.title}`);
                 
                 textChannel.send(undefined, embed)
                   .then(() => {
@@ -164,7 +164,7 @@ bot.on('message', (message) => {
                 .attachFile(`image-${id}.jpg`)
                 .setColor('ff62a5')
                 .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                .setTitle(`${post.title}`);
+                .setTitle(`r/${post.subreddit} - ${post.title}`);
               
               textChannel.send(undefined, embed)
                 .then(() => {
