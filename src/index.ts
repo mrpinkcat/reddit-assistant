@@ -7,6 +7,8 @@ import config from './env';
 import logger from './logger';
 import { getAudioUrl, downloadFile, updateStatus, sendJoinMessage } from './utils';
 import audioAssembler from './audioAssembler';
+import sendMedia from './sendMedia';
+import getExtention from './getExtention';
 
 export const bot = new Discord.Client();
 
@@ -46,7 +48,9 @@ bot.on('message', (message) => {
       matches: article,
       id,
     });
+    console.log('edit')
     article.forEach((match) => {
+      console.log(match);
       axios.get(`https://api.reddit.com/${match}`)
       .then((res) => {
         
@@ -61,42 +65,8 @@ bot.on('message', (message) => {
         let contentUrlSound: string;
         let ext: string;
 
-        // TO SPLIT CODE
-        if (post.preview && post.preview.reddit_video_preview || crosspostData && crosspostData.preview && crosspostData.preview.reddit_video_preview) {
-          if (crosspostData) {
-            ext = 'mp4';
-            contentUrl = crosspostData.preview.reddit_video_preview.fallback_url;
-            contentUrlSound = getAudioUrl(contentUrl);
-            console.log('crosspostData.preview');
-          } else {
-            ext = 'mp4';
-            contentUrl = post.preview.reddit_video_preview.fallback_url;
-            contentUrlSound = getAudioUrl(contentUrl);
-            console.log('post.preview');
-          }
-        } else if (post.media && post.media.reddit_video && post.media.reddit_video.fallback_url || crosspostData && crosspostData.media && crosspostData.media.reddit_video && crosspostData.media.reddit_video.fallback_url) {
-          if (crosspostData) {
-            ext = 'mp4';
-            contentUrl = crosspostData.media.reddit_video.fallback_url;
-            contentUrlSound = getAudioUrl(contentUrl);
-            console.log('crosspostData.media');
-          } else {
-            ext = 'mp4';
-            contentUrl = post.media.reddit_video.fallback_url;
-            contentUrlSound = getAudioUrl(contentUrl);
-            console.log('post.media');
-          }
-        } else {
-          if (crosspostData) {
-            ext = 'jpg';
-            contentUrl = crosspostData.url;
-            console.log('crosspostData.url');
-          } else {
-            ext = 'jpg';
-            contentUrl = post.url;
-            console.log('post.url');
-          }
-        }
+        //@ts-ignore
+        ({ext, contentUrl, contentUrlSound} = getExtention(post))
         
         if (!contentUrl.match(articleRegex) && !contentUrl.startsWith('https://youtu.be')) {
           textChannel.startTyping();
@@ -107,25 +77,7 @@ bot.on('message', (message) => {
             downloadFile(contentUrl, 'mp4', `video-${id}`).then(() => {
               downloadFile(contentUrlSound, 'mp3', `audio-${id}`).then(() => {
                 audioAssembler(`video-${id}.mp4`, `audio-${id}.mp3`, `reddit-media-${id}`).then(() => {
-                  const embed = new RichEmbed()
-                    .attachFile(`reddit-media-${id}.mp4`)
-                    .setColor('ff62a5')
-                    .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                    .setTitle(`r/${post.subreddit} - ${post.title}`);
-                  
-                  textChannel.send(undefined, embed)
-                    .then(() => {
-                      console.log('Message send');
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                    })
-                    .finally(() => {
-                      // Stop le typing
-                      textChannel.stopTyping();
-                      // Suppression du fichier
-                      fs.unlinkSync(`reddit-media-${id}.mp4`);
-                    });
+                  sendMedia(textChannel, `./reddit-media-${id}.mp4`, post, match, message);
                 })
                 .catch(() => {
                   // Stop le typing
@@ -137,49 +89,13 @@ bot.on('message', (message) => {
                 });
               })
               .catch(() => {
-                const embed = new RichEmbed()
-                  .attachFile(`video-${id}.mp4`)
-                  .setColor('ff62a5')
-                  .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                  .setTitle(`r/${post.subreddit} - ${post.title}`);
-                
-                textChannel.send(undefined, embed)
-                  .then(() => {
-                    console.log('Message send');
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  })
-                  .finally(() => {
-                    // Stop le typing
-                    textChannel.stopTyping();
-                    // Suppression du fichier
-                    fs.unlinkSync(`video-${id}.mp4`);
-                  });
+                sendMedia(textChannel, `video-${id}.mp4`, post, match, message);
               });
             });
           } else {
             downloadFile(contentUrl, 'jpg', `image-${id}`).then(() => {
-              const embed = new RichEmbed()
-                .attachFile(`image-${id}.jpg`)
-                .setColor('ff62a5')
-                .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-                .setTitle(`r/${post.subreddit} - ${post.title}`);
-              
-              textChannel.send(undefined, embed)
-                .then(() => {
-                  console.log('Message send');
-                })
-                .catch((err) => {
-                  console.log(err);
-                })
-                .finally(() => {
-                  // Stop le typing
-                  textChannel.stopTyping();
-                  // Suppression du fichier
-                  fs.unlinkSync(`image-${id}.jpg`);
-                });
-            })
+              sendMedia(textChannel, `image-${id}.jpg`, post, match, message);
+            });
           }
 
         // Si c'est un lien youtube
