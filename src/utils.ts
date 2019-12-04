@@ -64,7 +64,7 @@ export const sendJoinMessage = (guild: Guild) => {
   .addField(':movie_camera: __Basic utilisation__', 'Send a Reddit link anywhere and I’ll post the preview of it’s media')
   .addField(':tools: __Functionality__', 'I’m compatible with Reddit images, gifs, videos and YouTube posts')
   .addField(':computer: __Source code__', 'All the code of this application is open source & [available on GitHub](https://github.com/mrpinkcat/reddit-assistant)')
-  .addField(':bug: __Bug report__', 'If you encouter any bugs, please report them by [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or by adding *Mr. Pink#9591* on Discord\n\n**Try it out !**');
+  .addField(':bug: __Bug report__', 'If you encouter any bugs or if you have any ideas for improve this bot, please [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or add *Mr. Pink#9591* on Discord');
   // Selection d'un channel pour envoyer le message de join
   if (guild.systemChannel) {
     (guild.systemChannel as TextChannel).send(undefined, embed);

@@ -23,10 +23,10 @@ const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     if (token === config.authToken) {
       next()
     } else {
-      res.sendStatus(403);
+      res.sendStatus(401);
     }
   } else {
-    res.sendStatus(403);
+    res.sendStatus(401);
   }
 }
 
@@ -38,18 +38,26 @@ app.get('/heartbeat', (req, res) => res.sendStatus(200));
 
 app.post('/message', checkAuth, (req, res) => {
   const fields: { name: string, value: string }[] = req.body.fields;
-  if (fields) {
+  const title: string = req.body.title;
+
+  if (fields && title) {
     // Création de l'embed
     const embed = new RichEmbed({
-      title: ':wave: Developer of Reddit Assistant here!',
+      title,
       footer: { text: 'Coded with 💔& ☕️by Mr. Pink#9591' },
-      hexColor: 'ff62a5',
       timestamp: new Date(),
     });
-
+    
     fields.forEach((field) => {
       embed.addField(field.name, field.value);
     });
+
+    // Ajout de champs par défaut
+    embed
+    .addBlankField()
+    .setColor('ff62a5')
+    .addField(':computer: __Source code__', 'All the code of this application is open source & [available on GitHub](https://github.com/mrpinkcat/reddit-assistant)')
+    .addField(':bug: __Bug report__', 'If you encouter any bugs or if you have any ideas for improve this bot, please [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or add *Mr. Pink#9591* on Discord');
 
     // Loop dans chaque guild
     bot.guilds.array().forEach((guild, index) => {
@@ -57,30 +65,38 @@ app.post('/message', checkAuth, (req, res) => {
       // Selection d'un channel pour envoyer le message
       if (guild.systemChannel) {
         (guild.systemChannel as TextChannel).send(embed).then(() => {
-          // Pour check si on a envoyé le message a toutes le guilds
+          logger.info('Custom message sent', {
+            guild: guild.name,
+          });
+
+          // Pour check si on a envoyé le message a toutes les guilds pour renvoyer la réponse HTTP
           if (index + 1 === bot.guilds.array().length) {
-            res.status(200).send({
-              status: 'Message sent',
-              guilds: bot.guilds.array(),
-            });
+            sendResponse();
           }
         });
       } else {
         (guild.channels.find((channel) => channel.type === 'text') as TextChannel).send(embed).then(() => {
-          // Pour check si on a envoyé le message a toutes le guilds
+          logger.info('Custom message sent', {
+            guild: guild.name,
+          });
+
+          // Pour check si on a envoyé le message a toutes les guilds pour renvoyer la réponse HTTP
           if (index + 1 === bot.guilds.array().length) {
-            res.status(200).send({
-              status: 'Message sent',
-              guilds: bot.guilds.array(),
-            });
+            sendResponse();
           }
         });
       }
 
+      const sendResponse = () => {
+        res.status(200).send({
+          status: 'Message sent',
+          guilds: bot.guilds.array(),
+        });
+      }
       
     })
   } else {
-    res.sendStatus(401);
+    res.sendStatus(400);
   }
 });
 
