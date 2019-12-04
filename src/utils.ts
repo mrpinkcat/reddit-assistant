@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 
 import { bot } from './index'
 import { Guild, RichEmbed, TextChannel } from 'discord.js';
+import logger from './logger';
 
 export const getAudioUrl = (videoUrl: string): string => {
   console.log(`sound ${videoUrl}`);
@@ -46,7 +47,10 @@ export const downloadFile = (url: string, ext: string, output: string): Promise<
 }
 
 export const updateStatus = () => {
-  console.log(`The bot is on ${bot.guilds.array().length} servers`);
+ logger.info(`The bot is connected on ${bot.guilds.array().length} servers`);
+ bot.guilds.forEach((guild) => {
+   console.log('-', guild.name, 'owned by', guild.owner.user.tag);
+ });
   bot.user.setActivity(`links on ${bot.guilds.array().length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
 }
 

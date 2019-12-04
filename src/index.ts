@@ -1,20 +1,22 @@
-import Discord, { TextChannel, RichEmbed, Message, Guild, CategoryChannel } from 'discord.js';
+import Discord, { TextChannel } from 'discord.js';
 import axios from 'axios';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
 import config from './env';
 import logger from './logger';
-import { getAudioUrl, downloadFile, updateStatus, sendJoinMessage } from './utils';
+import { downloadFile, updateStatus, sendJoinMessage } from './utils';
 import audioAssembler from './audioAssembler';
 import sendMedia from './sendMedia';
 import getExtention from './getExtention';
+import startCustomMessageApi from './customSender';
 
 export const bot = new Discord.Client();
 
 bot.login(config.discord.token);
 
 bot.on('ready', () => {
+  startCustomMessageApi();
   logger.info('Bot is ready');
   updateStatus();
 });
@@ -31,7 +33,7 @@ bot.on('guildDelete', (guild) => {
 });
 
 bot.on('message', (message) => {
-  const textChannel = (message.channel as TextChannel);
+  const channel = message.channel;
   
   const articleRegex = /(r\/)([A-Za-z0-9_]+\/)((comments)\/)([a-z|0-9]+)/g
   const article = message.content.match(articleRegex);
@@ -48,7 +50,6 @@ bot.on('message', (message) => {
       matches: article,
       id,
     });
-    console.log('edit')
     article.forEach((match) => {
       console.log(match);
       axios.get(`https://api.reddit.com/${match}`)
@@ -69,7 +70,7 @@ bot.on('message', (message) => {
         ({ext, contentUrl, contentUrlSound} = getExtention(post))
         
         if (!contentUrl.match(articleRegex) && !contentUrl.startsWith('https://youtu.be')) {
-          textChannel.startTyping();
+          channel.startTyping();
 
           console.log(contentUrl);
 
@@ -77,11 +78,11 @@ bot.on('message', (message) => {
             downloadFile(contentUrl, 'mp4', `video-${id}`).then(() => {
               downloadFile(contentUrlSound, 'mp3', `audio-${id}`).then(() => {
                 audioAssembler(`video-${id}.mp4`, `audio-${id}.mp3`, `reddit-media-${id}`).then(() => {
-                  sendMedia(textChannel, `./reddit-media-${id}.mp4`, post, match, message);
+                  sendMedia(channel, `./reddit-media-${id}.mp4`, post, match, message);
                 })
                 .catch(() => {
                   // Stop le typing
-                  textChannel.stopTyping();
+                  channel.stopTyping();
                   // Suppression des fichiers
                   fs.unlinkSync(`video-${id}.mp4`);
                   fs.unlinkSync(`audio-${id}.mp3`);
@@ -89,12 +90,12 @@ bot.on('message', (message) => {
                 });
               })
               .catch(() => {
-                sendMedia(textChannel, `video-${id}.mp4`, post, match, message);
+                sendMedia(channel, `video-${id}.mp4`, post, match, message);
               });
             });
           } else {
             downloadFile(contentUrl, 'jpg', `image-${id}`).then(() => {
-              sendMedia(textChannel, `image-${id}.jpg`, post, match, message);
+              sendMedia(channel, `image-${id}.jpg`, post, match, message);
             });
           }
 
@@ -102,7 +103,7 @@ bot.on('message', (message) => {
         } else if (contentUrl.startsWith('https://youtu.be')) {
           console.log('lien youtube');
 
-          textChannel.send(`${post.subreddit_name_prefixed} - ${post.title}\n${contentUrl}`);
+          channel.send(`${post.subreddit_name_prefixed} - ${post.title}\n${contentUrl}`);
         } else {
           console.log('this is not a media post');
         }

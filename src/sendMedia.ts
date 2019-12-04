@@ -1,7 +1,8 @@
-import { TextChannel, RichEmbed, Message } from 'discord.js';
+import { TextChannel, RichEmbed, Message, DMChannel, GroupDMChannel } from 'discord.js';
 import fs from 'fs';
+import logger from './logger';
 
-export default (textChannel: TextChannel, media: string, post: any, match: string, originalMessage: Message) => {
+export default (channel: TextChannel | DMChannel | GroupDMChannel, media: string, post: any, match: string, originalMessage: Message) => {
   const embed = new RichEmbed()
   .attachFile(media)
   .setColor('ff62a5')
@@ -12,17 +13,40 @@ export default (textChannel: TextChannel, media: string, post: any, match: strin
   .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
   .setTitle(`r/${post.subreddit} - ${post.title}`);
 
-  textChannel.send(embed)
-  .then(() => {
-    console.log('Message send');
-    originalMessage.delete()
+  channel.send(embed)
+  .then((message) => {
+    const messageSent = (message as Message);
+
+    if (channel.type === 'text') {
+      const textChannel = (channel as TextChannel);
+
+      logger.info('Media sent', {
+        guildName: textChannel.guild.name,
+        guildId: textChannel.guild.id,
+        channelName: textChannel.name,
+        channelId: textChannel.id,
+        channelType: textChannel.type,
+        senderUsername: originalMessage.author.tag,
+        senderId: originalMessage.author.id,
+        media: messageSent.attachments.array()[0].url,
+      });
+
+      originalMessage.delete();
+    } else {
+      logger.info('Media sent', {
+        channelType: channel.type,
+        senderUsername: originalMessage.author.tag,
+        senderId: originalMessage.author.id,
+        media: messageSent.attachments.array()[0].url,
+      });
+    }
   })
   .catch((err) => {
     console.log(err);
   })
   .finally(() => {
     // Stop le typing
-    textChannel.stopTyping();
+    channel.stopTyping();
     // Suppression du fichier
     fs.unlinkSync(media);
   });
