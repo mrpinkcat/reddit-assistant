@@ -12,7 +12,7 @@ export const getAudioUrl = (videoUrl: string): string => {
   const toRemplaceArray = videoUrl.match(articleRegex);
   if (toRemplaceArray !== null) {
     const toRemplaceText = toRemplaceArray[0];
-    const audioUrl = videoUrl.replace(toRemplaceText, '/audio')
+    const audioUrl = videoUrl.replace(toRemplaceText, '/DASH_audio')
     console.log(`sound = ${audioUrl}`)
     return audioUrl;
   } else {
