@@ -3,12 +3,15 @@ import fs from 'fs';
 import Promise from 'bluebird';
 
 import { bot } from './index'
-import { Guild, RichEmbed, TextChannel } from 'discord.js';
+import { Client, Guild, RichEmbed, TextChannel } from 'discord.js';
 import logger from './logger';
 
 export const getAudioUrl = (videoUrl: string): string => {
   console.log(`sound ${videoUrl}`);
-  const articleRegex = /\/+([A-Z])\w+/g
+  /**
+   * 
+   */
+  const articleRegex = /\/+([A-Z])\w+/g;
   const toRemplaceArray = videoUrl.match(articleRegex);
   if (toRemplaceArray !== null) {
     const toRemplaceText = toRemplaceArray[0];
@@ -47,24 +50,26 @@ export const downloadFile = (url: string, ext: string, output: string): Promise<
 }
 
 export const updateStatus = () => {
- logger.info(`The bot is connected on ${bot.guilds.array().length} servers`);
- bot.guilds.forEach((guild) => {
-   console.log('-', guild.name, 'owned by', guild.owner.user.tag);
- });
+  logger.info(`The bot is connected on ${bot.guilds.array().length} servers`);
+  bot.guilds.forEach((guild) => {
+    guild.client.fetchUser(guild.ownerID).then((user) => {
+      console.log('-', guild.name, 'owned by', user.username);
+    });
+  });
   bot.user.setActivity(`links on ${bot.guilds.array().length} server${bot.guilds.array().length > 1 ? 's' : ''}`, { type: 'LISTENING' });
 }
 
 export const sendJoinMessage = (guild: Guild) => {
   const embed = new RichEmbed()
-  .attachFile('./assets/hohellothere.gif')
-  .setColor('ff62a5')
-  .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
-  .setTitle('**HO HELLO THERE !**')
-  .setDescription('I’m your Reddit link assistant, thanks for inviting me')
-  .addField(':movie_camera: __Basic utilisation__', 'Send a Reddit link anywhere and I’ll post the preview of it’s media')
-  .addField(':tools: __Functionality__', 'I’m compatible with Reddit images, gifs, videos and YouTube posts')
-  .addField(':computer: __Source code__', 'All the code of this application is open source & [available on GitHub](https://github.com/mrpinkcat/reddit-assistant)')
-  .addField(':bug: __Bug report__', 'If you encouter any bugs or if you have any ideas for improve this bot, please [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or add *Mr. Pink#9591* on Discord');
+    .attachFile('./assets/hohellothere.gif')
+    .setColor('ff62a5')
+    .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
+    .setTitle('**HO HELLO THERE !**')
+    .setDescription('I’m your Reddit link assistant, thanks for inviting me')
+    .addField(':movie_camera: __Basic utilisation__', 'Send a Reddit link anywhere and I’ll post the preview of it’s media')
+    .addField(':tools: __Functionality__', 'I’m compatible with Reddit images, gifs, videos and YouTube posts')
+    .addField(':computer: __Source code__', 'All the code of this application is open source & [available on GitHub](https://github.com/mrpinkcat/reddit-assistant)')
+    .addField(':bug: __Bug report__', 'If you encouter any bugs or if you have any ideas for improve this bot, please [opening an issue](https://github.com/mrpinkcat/reddit-assistant/issues/new) on GitHub or add *Mr. Pink#9591* on Discord');
   // Selection d'un channel pour envoyer le message de join
   if (guild.systemChannel) {
     (guild.systemChannel as TextChannel).send(undefined, embed);
