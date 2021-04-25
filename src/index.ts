@@ -9,14 +9,12 @@ import { downloadFile, updateStatus, sendJoinMessage } from './utils';
 import audioAssembler from './audioAssembler';
 import sendMedia from './sendMedia';
 import getExtention from './getExtention';
-import startCustomMessageApi from './customSender';
 
 export const bot = new Discord.Client();
 
 bot.login(config.discord.token);
 
 bot.on('ready', () => {
-  startCustomMessageApi();
   logger.info('Bot is ready');
   updateStatus();
 });
