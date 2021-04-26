@@ -41,6 +41,9 @@ export default (
       });
 
       originalMessage.delete();
+      if (loadingMessage) {
+        loadingMessage.delete();
+      }
     } else {
       logger.info('Media sent', {
         channelType: channel.type,

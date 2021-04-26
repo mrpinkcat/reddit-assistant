@@ -16,7 +16,6 @@ export default (video: string, audio: string, output: string, loadingMessage: lo
       //   console.log('start');
       // })
       .on('end', () => {
-        loadingMessage.delete();
         fs.unlinkSync(video);
         fs.unlinkSync(audio);
         // console.log('ok !')
@@ -28,7 +27,6 @@ export default (video: string, audio: string, output: string, loadingMessage: lo
       })
       .on('progress', async (progress) => {
         if (lastProgressUpdate) {
-          console.log(new Date().getTime() - lastProgressUpdate);
           // Avoit spamming the discord API
           if (new Date().getTime() - lastProgressUpdate > 1300) {
             await loadingMessage.sendPercentage(`Assembling video & audio... (${Math.round(progress.percent)}%)`, progress.percent);

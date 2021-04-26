@@ -13,12 +13,18 @@ export default class {
   private message?: Message;
 
   /**
+   * If the message showing an error
+   */
+  private errored: boolean;
+
+  /**
    * Instantiate a new loading message 
    * @param channel The channel where the message will be sent
    * @param title The title of the message
    */
   constructor(channel: TextChannel) {
     this.channel = channel;
+    this.errored = false;
   }
 
   /**
@@ -55,6 +61,7 @@ export default class {
   }
 
   public async error(title: string) {
+    this.errored = true;
     const embed = new RichEmbed()
       .setColor(MESSAGE_COLOR)
       .setFooter(MESSAGE_FOOTER)
@@ -63,19 +70,18 @@ export default class {
       await this.message.edit(embed);
       setInterval(() => {
         this.message?.delete();
-        this.message = undefined;
-      }, 5000);
+      }, 20000);
     } else {
       this.message = await this.channel.send(embed);
       setInterval(() => {
         this.message?.delete();
         this.message = undefined;
-      }, 5000);
+      }, 20000);
     }
   }
 
   public delete() {
-    if (this.message) {
+    if (this.message && !this.errored) {
       this.message.delete();
       this.message = undefined;
     }
