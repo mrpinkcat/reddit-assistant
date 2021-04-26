@@ -1,4 +1,4 @@
-import Discord, { TextChannel } from 'discord.js';
+import Discord, { DMChannel, GroupDMChannel, TextChannel } from 'discord.js';
 import axios from 'axios';
 import fs from 'fs';
 import uniqid from 'uniqid';
@@ -9,6 +9,7 @@ import { downloadFile, updateStatus, sendJoinMessage } from './utils';
 import audioAssembler from './audioAssembler';
 import sendMedia from './sendMedia';
 import getExtention from './getExtention';
+import loadingMessage from './loadingMessage';
 
 export const bot = new Discord.Client();
 
@@ -32,6 +33,9 @@ bot.on('guildDelete', (guild) => {
 
 bot.on('message', (message) => {
   const channel = message.channel;
+  if (channel instanceof DMChannel || channel instanceof GroupDMChannel) {
+    return;
+  }
   
   const articleRegex = /(r\/)([A-Za-z0-9_]+\/)((comments)\/)([a-z|0-9]+)/g
   const article = message.content.match(articleRegex);
@@ -51,7 +55,7 @@ bot.on('message', (message) => {
     article.forEach((match) => {
       console.log(match);
       axios.get(`https://api.reddit.com/${match}`)
-      .then((res) => {
+      .then(async (res) => {
         
         const post = res.data[0].data.children[0].data;
         let crosspostData: any;
@@ -67,30 +71,29 @@ bot.on('message', (message) => {
         //@ts-ignore
         ({ext, contentUrl, contentUrlSound} = getExtention(post))
         
-        if (!contentUrl.match(articleRegex) && !contentUrl.startsWith('https://youtu.be')) {
-          channel.startTyping();
-
+        if (!contentUrl.match(articleRegex) && !contentUrl.startsWith('https://youtu.be')) {          
           console.log(contentUrl);
-
+          
           if (ext === 'mp4') {
-            downloadFile(contentUrl, 'mp4', `video-${id}`).then(() => {
-              downloadFile(contentUrlSound, 'mp3', `audio-${id}`).then(() => {
-                audioAssembler(`video-${id}.mp4`, `audio-${id}.mp3`, `reddit-media-${id}`).then(() => {
-                  sendMedia(channel, `./reddit-media-${id}.mp4`, post, match, message);
-                })
-                .catch(() => {
-                  // Stop le typing
-                  channel.stopTyping();
-                  // Suppression des fichiers
-                  fs.unlinkSync(`video-${id}.mp4`);
-                  fs.unlinkSync(`audio-${id}.mp3`);
-                  fs.unlinkSync(`reddit-media-${id}.mp4`);
-                });
-              })
-              .catch(() => {
-                sendMedia(channel, `video-${id}.mp4`, post, match, message);
-              });
-            });
+            const loadingProgressionMessage = await new loadingMessage(channel).sendStatus('Dowloading files...');
+            try {
+              await downloadFile(contentUrl, 'mp4', `video-${id}`);
+              await downloadFile(contentUrlSound, 'mp3', `audio-${id}`);
+              await loadingProgressionMessage.sendStatus('Assembling video & audio...');
+              await audioAssembler(`video-${id}.mp4`, `audio-${id}.mp3`, `reddit-media-${id}`, loadingProgressionMessage);
+              sendMedia(channel, `./reddit-media-${id}.mp4`, post, match, message, loadingProgressionMessage);
+            } catch (error) {
+              if (error === 403) {
+                loadingProgressionMessage.delete();
+                sendMedia(channel, `video-${id}.mp4`, post, match, message, loadingProgressionMessage);
+              } else {
+                loadingProgressionMessage.delete();
+                // Suppression des fichiers
+                fs.unlinkSync(`video-${id}.mp4`);
+                fs.unlinkSync(`audio-${id}.mp3`);
+                fs.unlinkSync(`reddit-media-${id}.mp4`);
+              }
+            }
           } else {
             downloadFile(contentUrl, 'jpg', `image-${id}`).then(() => {
               sendMedia(channel, `image-${id}.jpg`, post, match, message);
