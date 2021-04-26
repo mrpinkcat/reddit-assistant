@@ -1,9 +1,8 @@
 import https from 'https';
 import fs from 'fs';
-import Promise from 'bluebird';
 
 import { bot } from './index'
-import { Client, Guild, RichEmbed, TextChannel } from 'discord.js';
+import { Guild, RichEmbed, TextChannel } from 'discord.js';
 import logger from './logger';
 
 export const MESSAGE_FOOTER = 'Coded with  ☕️ by Mr. Pink#9591';

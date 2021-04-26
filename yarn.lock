@@ -30,11 +30,6 @@
   dependencies:
     axios "*"
 
-"@types/bluebird@^3.5.27":
-  version "3.5.33"
-  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.33.tgz#d79c020f283bd50bd76101d7d300313c107325fc"
-  integrity sha512-ndEo1xvnYeHxm7I/5sF6tBvnsA4Tdi3zj1keRKRs12SP+2ye2A27NDJ1B6PqkfMbGAcT+mqQVqbZRIrhfOp5PQ==
-
 "@types/body-parser@*", "@types/body-parser@^1.17.1":
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.0.tgz#0685b3c47eb3006ffed117cdd55164b61f80538f"
@@ -237,11 +232,6 @@ binary-extensions@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
   integrity sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==
-
-bluebird@^3.5.5:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
-  integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
 
 body-parser@1.19.0, body-parser@^1.19.0:
   version "1.19.0"

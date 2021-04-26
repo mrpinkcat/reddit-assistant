@@ -2,9 +2,6 @@ import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
 import loadingMessage from './loadingMessage';
 
-// I redefined global variabe to avoid the 'Duplicate identifier' error
-Promise = require('bluebird');
-
 export default (video: string, audio: string, output: string, loadingMessage: loadingMessage): Promise<string> => {
   return new Promise((resolve, reject) => {
     let lastProgressUpdate: number;
