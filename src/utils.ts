@@ -6,6 +6,9 @@ import { bot } from './index'
 import { Client, Guild, RichEmbed, TextChannel } from 'discord.js';
 import logger from './logger';
 
+export const MESSAGE_FOOTER = 'Coded with  ☕️ by Mr. Pink#9591';
+export const MESSAGE_COLOR = 'ff62a5';
+
 export const getAudioUrl = (videoUrl: string): string => {
   console.log(`sound ${videoUrl}`);
   /**
@@ -31,8 +34,8 @@ export const downloadFile = (url: string, ext: string, output: string): Promise<
     
     https.get(url, (response) => {
       if (response.statusCode !== 200) {
-        console.error('Error while downloading conent', { errorCode: response.statusCode});
-        reject(403);
+        console.error(`Error while downloading ${ext} conent ${ext === 'mp3' ? '\n Probably because the content don\'t have sound.' : ''}`, { errorCode: response.statusCode});
+        reject(response.statusCode);
       } else {
         // Création du fichier à écrire
         const file = fs.createWriteStream(`${output}.${ext}`);
@@ -61,9 +64,9 @@ export const updateStatus = () => {
 
 export const sendJoinMessage = (guild: Guild) => {
   const embed = new RichEmbed()
+    .setColor(MESSAGE_COLOR)
+    .setFooter(MESSAGE_FOOTER)
     .attachFile('./assets/hohellothere.gif')
-    .setColor('ff62a5')
-    .setFooter('Coded with 💔& ☕️by Mr. Pink#9591')
     .setTitle('**HO HELLO THERE !**')
     .setDescription('I’m your Reddit link assistant, thanks for inviting me')
     .addField(':movie_camera: __Basic utilisation__', 'Send a Reddit link anywhere and I’ll post the preview of it’s media')
